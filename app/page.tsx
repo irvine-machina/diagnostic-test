@@ -1,101 +1,170 @@
-import Image from "next/image";
+"use client"
+import React, { useState, useEffect } from 'react'
+import { CheckCircle, AlertTriangle, Clock } from 'lucide-react'
 
-export default function Home() {
+export default function DiagnosticTest() {
+  const [step, setStep] = useState(0)
+  const [timer, setTimer] = useState(0)
+  const [timerActive, setTimerActive] = useState(false)
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout
+    if (timerActive && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1)
+      }, 1000)
+    } else if (timer === 0) {
+      setTimerActive(false)
+    }
+    return () => clearInterval(interval)
+  }, [timerActive, timer])
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const steps = [
+    {
+      title: "Preparation",
+      instructions: [
+        "Wash hands thoroughly with soap and water",
+        "Clear a clean, flat surface",
+        "Check test kit contents",
+        "Read all instructions first"
+      ],
+      warning: "Ensure all materials are present before starting",
+      success: "Great! You're ready to begin the test."
+    },
+    {
+      title: "Sample Collection",
+      instructions: [
+        "Open the sterile swab package",
+        "Follow collection instructions carefully",
+        "Place sample in solution tube",
+        "Mix well according to instructions"
+      ],
+      warning: "Do not touch the swab tip or let it contact any surface",
+      success: "Sample collected successfully!"
+    },
+    {
+      title: "Test Processing",
+      instructions: [
+        "Add exactly the specified drops to test device",
+        "Start the timer immediately",
+        "Keep the device flat and stable",
+        "Wait for the full testing period"
+      ],
+      warning: "Do not move or disturb the test device during processing",
+      success: "Test is processing correctly."
+    },
+    {
+      title: "Results",
+      instructions: [
+        "Check that the control line is visible",
+        "Read results according to package instructions",
+        "Document your results if needed",
+        "Dispose of all materials properly"
+      ],
+      warning: "If control line is not visible, the test is invalid",
+      success: "You've completed the test correctly!"
+    }
+  ]
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <main className="p-8 max-w-2xl mx-auto bg-gradient-to-b from-white to-gray-50 min-h-screen">
+      <h1 className="text-3xl font-bold mb-6 text-black">At-Home Diagnostic Test Assistant</h1>
+      
+      {/* Progress bar */}
+      <div className="mb-8">
+        <div className="flex justify-between mb-2">
+          {steps.map((_, index) => (
+            <div key={index} className="flex flex-col items-center">
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all
+                  ${index < step ? 'border-green-500 bg-green-500 text-white' : 
+                    index === step ? 'border-blue-500 bg-blue-500 text-white' : 
+                    'border-gray-300 text-gray-700'}`}
+              >
+                {index < step ? <CheckCircle className="w-6 h-6" /> : index + 1}
+              </div>
+              <div className="text-xs mt-1 text-gray-600">Step {index + 1}</div>
+            </div>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      </div>
+
+      {/* Current step */}
+      <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-6">
+        <h2 className="text-2xl font-semibold mb-4 text-black flex items-center gap-2">
+          {steps[step].title}
+          {step < 3 && <span className="text-sm font-normal text-gray-500">Step {step + 1} of 4</span>}
+        </h2>
+        
+        {/* Warning message */}
+        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-4 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+          <p className="text-amber-700">{steps[step].warning}</p>
+        </div>
+
+        <ul className="space-y-4 text-gray-700 mb-6">
+          {steps[step].instructions.map((instruction, index) => (
+            <li key={index} className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
+              <span className="text-blue-500 font-bold">{index + 1}.</span>
+              {instruction}
+            </li>
+          ))}
+        </ul>
+
+        {/* Timer for step 2 */}
+        {step === 2 && (
+          <div className="bg-blue-50 p-4 rounded-lg mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-blue-500" />
+                <span className="font-medium">Test Timer</span>
+              </div>
+              <span className="text-4xl font-mono font-bold text-blue-600">{formatTime(timer)}</span>
+            </div>
+            <button
+              onClick={() => {
+                if (!timerActive && timer === 0) setTimer(900); // 15 minutes
+                setTimerActive(!timerActive);
+              }}
+              className="w-full mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            >
+              {timer === 0 ? "Start Timer (15:00)" : timerActive ? "Pause" : "Resume"}
+            </button>
+          </div>
+        )}
+
+        {/* Success message */}
+        <div className="bg-green-50 border-l-4 border-green-500 p-4">
+          <p className="text-green-700 flex items-center gap-2">
+            <CheckCircle className="w-5 h-5" />
+            {steps[step].success}
+          </p>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex justify-between">
+        <button
+          onClick={() => setStep(prev => Math.max(0, prev - 1))}
+          disabled={step === 0}
+          className="px-6 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 disabled:opacity-50 transition-colors"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          Previous
+        </button>
+        <button
+          onClick={() => setStep(prev => Math.min(steps.length - 1, prev + 1))}
+          disabled={step === steps.length - 1}
+          className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 transition-colors"
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+          Next
+        </button>
+      </div>
+    </main>
+  )
 }
